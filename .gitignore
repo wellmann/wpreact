@@ -1,0 +1,10 @@
+.DS_STORE
+.vagrant
+node_modules/*
+public/css/*
+public/js/*
+public/assets.json
+server/ssl/*
+server/wp/*
+server/.env
+shared/*
