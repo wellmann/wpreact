@@ -2,13 +2,11 @@
 
 // Dependencies
 import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
 import express from 'express';
 import http from 'http';
+import { httpsRedirect, expressPhp, wordpressSubdir } from './middleware';
 import spdy from 'spdy';
 import shrinkRay from 'shrink-ray';
-import epf from 'express-php-fpm';
 import preact from 'preact';
 import renderToString from 'preact-render-to-string';
 import Helmet from 'preact-helmet';
@@ -18,23 +16,9 @@ import assets from '../public/assets.json';
 // Constants
 const { h } = preact,
   { default: AppHandler } = AppHandlerDefault,
-  env = process.env.NODE_ENV,
   port = process.env.PORT || 3000,
   server = express(),
-  indexHtml = fs.readFileSync('./server/index.html', 'utf8'),
-  { parsed: parsedDotenv } = dotenv.config({ path: './server/.env' }),
-  { wordpressSubdir } = JSON.parse(fs.readFileSync('./package.json', 'utf8')).config,
-  phpEnv = {
-    'WP_DEBUG_DISPLAY': (env != 'production'),
-    'WP_DEBUG_LOG': (env == 'production'),
-    'WP_SUBDIR': wordpressSubdir,
-    'HTTPS': 'on'
-  },
-  epfOptions = {
-    documentRoot: path.join(path.resolve('./server'), wordpressSubdir),
-    env: Object.assign(parsedDotenv, phpEnv),
-    socketOptions: { port: 9000 },
-  };
+  indexHtml = fs.readFileSync('./server/index.html', 'utf8');
 
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
@@ -47,16 +31,10 @@ const { h } = preact,
 // * Serves request through preact-router
 server
   .disable('x-powered-by')
-  .use((req, res, next) => {
-    if (!req.secure) {
-      res.redirect('https://' + req.headers.host + req.url);
-      return;
-    }
-    next();
-  })
+  .use(httpsRedirect())
   .use(shrinkRay())
   .use(express.static('public', { maxAge: 31557600 }))
-  .use(wordpressSubdir, epf(epfOptions))
+  .use(wordpressSubdir, expressPhp())
   .get(/^\/(admin|login|wp-admin|wp-login)\/?/, (req, res) => res.redirect('/wp/wp-admin/'))
   .get('*', (req, res) => {
     const appHtml = renderToString(h(AppHandler, { url: req.url })),
