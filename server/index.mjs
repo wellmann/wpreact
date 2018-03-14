@@ -17,18 +17,11 @@ import assets from '../public/assets.json';
 const { h } = preact,
   { default: AppHandler } = AppHandlerDefault,
   port = process.env.PORT || 3000,
-  server = express(),
-  indexHtml = fs.readFileSync('./server/index.html', 'utf8');
+  server = express();
 
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 // Express server
-//
-// * Redirects http requests to https
-// * Enables GZIP compression
-// * Registers public assets directory
-// * Redirects wp-admin to proper subdirectory
-// * Serves request through preact-router
 server
   .disable('x-powered-by')
   .use(httpsRedirect())
@@ -36,28 +29,13 @@ server
   .use(express.static('public', { maxAge: 31557600 }))
   .use(wordpressSubdir, expressPhp())
   .get(/^\/(admin|login|wp-admin|wp-login)\/?/, (req, res) => res.redirect('/wp/wp-admin/'))
+  .set('views', './server')
   .get('*', (req, res) => {
-    const appHtml = renderToString(h(AppHandler, { url: req.url })),
-      head = Helmet.rewind();
+    const app = renderToString(h(AppHandler, { url: req.url })),
+      head = Helmet.rewind(),
+      title = head.title.toString();
 
-    // Inserts rendered app
-    let serverHtml = indexHtml.replace('<!-- ::APP:: -->', appHtml);
-
-    // Updates head meta tgas
-    const helmetAttr = / data-preact-helmet/g,
-      docTitle = head.title.toString().replace(helmetAttr, ''),
-      metaTags = head.meta.toString().replace(helmetAttr, '');
-
-    serverHtml = serverHtml.replace('<html>', `<html ${head.htmlAttributes.toString()}>`);
-    serverHtml = serverHtml.replace('<!-- ::TITLE:: -->', docTitle);
-    serverHtml = serverHtml.replace('<!-- ::META:: -->', metaTags);
-
-    // Updates assets paths with version hashes
-    Object.keys(assets).forEach(function (key) {
-      serverHtml = serverHtml.replace(key, assets[key]);
-    });
-
-    res.send(serverHtml);
+    res.render('index.pug', Object.assign({title, app}, assets));
   });
 
 // HTTP 1.1 Server

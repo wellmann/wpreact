@@ -1,0 +1,13 @@
+doctype html
+html(lang=lang)
+  head
+    meta(charset="utf-8")
+    meta(http-equiv="x-ua-compatible" content="ie=edge")
+    title=title
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    link(rel="stylesheet" href=styles)
+    script.
+        window.__DATA__ = #{state};
+  body
+    #app!=app
+    script(src=bundle)
