@@ -4,22 +4,20 @@
 import fs from 'fs';
 import express from 'express';
 import http from 'http';
-import { httpsRedirect, expressPhp, wordpressSubdir } from './middleware';
+import {
+  httpsRedirect,
+  wordpressSubdir,
+  expressPhp,
+  renderApp
+} from './middleware';
 import spdy from 'spdy';
 import shrinkRay from 'shrink-ray';
-import preact from 'preact';
-import renderToString from 'preact-render-to-string';
-import Helmet from 'preact-helmet';
-import AppHandlerDefault from '../shared/AppHandler';
-import assets from '../public/assets.json';
 
 // Constants
-const { h } = preact,
-  { default: AppHandler } = AppHandlerDefault,
-  port = process.env.PORT || 3000,
+const port = process.env.PORT || 3000,
   server = express();
 
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 // Express server
 server
@@ -30,13 +28,7 @@ server
   .use(wordpressSubdir, expressPhp())
   .get(/^\/(admin|login|wp-admin|wp-login)\/?/, (req, res) => res.redirect('/wp/wp-admin/'))
   .set('views', './server')
-  .get('*', (req, res) => {
-    const app = renderToString(h(AppHandler, { url: req.url })),
-      head = Helmet.rewind(),
-      title = head.title.toString();
-
-    res.render('index.pug', Object.assign({title, app}, assets));
-  });
+  .get('*', renderApp());
 
 // HTTP 1.1 Server
 http

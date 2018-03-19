@@ -18,7 +18,7 @@ const env = process.env.NODE_ENV,
     },
     epfOptions = {
         documentRoot: path.join(path.resolve('./server'), wordpressSubdir),
-        env: Object.assign(parsedDotenv, phpEnv),
+        env: { ...parsedDotenv, ...phpEnv },
         socketOptions: { port: 9000 },
     };
 
