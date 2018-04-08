@@ -3,6 +3,8 @@
 // Dependencies
 import { h, Component } from 'preact';
 import Router from 'preact-router';
+
+// Local dependencies
 import Home from './Home';
 import Page from './Page';
 import Blog from './Blog';

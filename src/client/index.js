@@ -2,6 +2,8 @@
 
 // Dependencies
 import { h, render } from 'preact';
+
+// Local dependencies
 import AppHandler from '../shared/AppHandler';
 
 // Constants

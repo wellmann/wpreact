@@ -2,43 +2,48 @@
 
 // Dependencies
 import { h, Component } from 'preact';
+//import { createStore, Provider, connect } from 'unistore/full/preact';
 import fetch from 'isomorphic-fetch';
-import Helmet from 'preact-helmet';
+
+// Local dependencies
+//import { withData } from '../data';
 //import styles from './styles.css';
 
+// Constants
+
+// Component
+/*@withData({
+    data: () => {
+        return fetch('https://192.168.12.44:3000/wp/index.php/wp-json/wp/v2/posts/?filter[posts_per_page]=1')
+            .then((res) => res.json());
+    },
+    mapToProps: (data) => ({ data }),
+})*/
 export default class extends Component {
     constructor() {
         super();
 
-        this.state = {};
+        this.state = {
+            data: []
+        };
     }
 
     componentWillMount() {
-        const data = fetch('https://192.168.12.44:3000/wp/index.php/wp-json/wp/v2/posts/?filter[posts_per_page]=1')
-            .then((res) => res.json());
-
-            console.log(data);
-
-        const helmetMeta = {
-            htmlAttributes: {
-                lang: 'en'
-            },
-            title: 'Home',
-            meta: [
-                { name: 'description', content: 'This is the home page :)' }
-            ]
-        };
-
-
-        this.setState({ helmetMeta: helmetMeta });
+        console.log('fetch');
+        fetch('https://192.168.12.44:3000/wp/index.php/wp-json/wp/v2/posts/?filter[posts_per_page]=1')
+            .then((res) => res.json())
+            .then((data) => this.setState({ data }));
     }
 
-    render({ }, { helmetMeta }) {
+    render({ }, { data }) {
+        console.log('render');
+        console.log(data);
 
         return (
             <div>
-                <Helmet {...helmetMeta} />
-                Home
+                Hello Home :)
+                <br />
+                {JSON.stringify(data)}
             </div>
         );
     }
