@@ -3,8 +3,10 @@
 // Dependencies
 import dotenv from 'dotenv';
 import path from 'path';
-import pkg from '../../package.json';
 import epf from 'express-php-fpm';
+
+// Local dependencies
+import pkg from '../../package.json';
 
 // Constants
 const env = process.env.NODE_ENV,
